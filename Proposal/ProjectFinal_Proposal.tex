@@ -1,0 +1,116 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% CSCI 1430 Written Question Template
+%
+% This is a LaTeX document. LaTeX is a markup language for producing documents.
+% Your task is to answer the questions by filling out this document, then to
+% compile this into a PDF document.
+%
+% TO COMPILE:
+% > pdflatex thisfile.tex
+
+% If you do not have LaTeX, your options are:
+% - VSCode extension: https://marketplace.visualstudio.com/items?itemName=James-Yu.latex-workshop
+% - Online Tool: https://www.overleaf.com/ - most LaTeX packages are pre-installed here (e.g., \usepackage{}).
+% - Personal laptops (all common OS): http://www.latex-project.org/get/ 
+%
+% If you need help with LaTeX, please come to office hours.
+% Or, there is plenty of help online:
+% https://en.wikibooks.org/wiki/LaTeX
+%
+% Good luck!
+% The CSCI 1430 staff
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% How to include two graphics on the same line:
+% 
+% \includegraphics[width=0.49\linewidth]{yourgraphic1.png}
+% \includegraphics[width=0.49\linewidth]{yourgraphic2.png}
+%
+% How to include equations:
+%
+% \begin{equation}
+% y = mx+c
+% \end{equation}
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[11pt]{article}
+
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[colorlinks = true,
+            linkcolor = blue,
+            urlcolor  = blue]{hyperref}
+\usepackage[a4paper,margin=1.5in]{geometry}
+\usepackage{stackengine,graphicx}
+\usepackage{fancyhdr}
+\setlength{\headheight}{15pt}
+\usepackage{microtype}
+\usepackage{times}
+\usepackage{booktabs}
+
+% From https://ctan.org/pkg/matlab-prettifier
+\usepackage[numbered,framed]{matlab-prettifier}
+
+\frenchspacing
+\setlength{\parindent}{0cm} % Default is 15pt.
+\setlength{\parskip}{0.3cm plus1mm minus1mm}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{Final Project Proposal}
+\rhead{CSCI 1430}
+\rfoot{\thepage}
+
+\date{}
+
+\title{\vspace{-1cm}Final Project Proposal}
+
+\begin{document}
+\maketitle
+\vspace{-1cm}
+\thispagestyle{fancy}
+
+\emph{Please make this document anonymous. Your team name should be anonymous.}
+
+\textbf{Team name: \emph{Pixel Pioneers}}
+
+\begin{itemize}
+  \item \textbf{What is your project idea?}\\
+  Our project aims to generate adversarial examples to break current computer vision systems. We mainly focus on improving the transferability of the generated adversarial example and its robustness. 
+
+  \item \textbf{What is the socio-historical context that this project lives in?}\\
+  The project is set in an era of rapid AI advancements, rising cybersecurity concerns, ethical discussions on AI use, regulatory developments, and strong academic-industry collaboration, underscoring the urgent need for secure, ethically developed AI technologies.
+
+  \item \textbf{Please list three stakeholders that your project could impact, and describe how it could impact them.}\\
+  Our project impacts tech companies and AI developers by revealing system vulnerabilities, pushing for stronger, more secure AI models. Consumers benefit from increased AI safety and trust, though misuse poses privacy risks. Regulatory bodies may use our findings to refine AI governance, enhancing security and ethical standards.
+
+  \item -----
+  \item \textbf{What are the skills of the team members? Conduct a skill assessment!}\\
+    \textit{Team member 1:} Proficient in using the Python language, has developed neural network models using the PyTorch framework. Additionally, has participated in image classification tasks and possesses a certain understanding of neural network principles.\\
+    \textit{Team member 2:} Successfully developed a runnable CNN neural network using Python. It includes convolutional layers and pooling layers. Additionally, able to explain the principles of this neural network.\\
+    \textit{Team member 3:} Know the adversarial machine learning techniques, including how to craft adversarial examples that can fool AI models without being detected by humans or other machines. Able to critically evaluate the strengths and weaknesses of AI models and to think creatively about how to test and improve them.
+  \item \textbf{What data will you use?}\\
+  We will choose 1000 images of different classes from ILSVRC 2012 validation set.
+  
+  \item \textbf{What software/hardware will you use?}\\
+  We will use the PyTorch framework to build our algorithm. For the hardware, we will apply the Oscar computing resource. 
+
+  \item \textbf{Who will do what?}\\
+    \textit{Team member 1:} Focuses on the development and optimization of machine learning models. This includes designing adversarial attack strategies to test the robustness of computer vision systems.\\
+    \textit{Team member 2:} Specializes in data handling, processing, and analysis. Ensures that the data used for training and testing is of high quality and diversity to effectively challenge AI models.\\
+    \textit{Team member 3:} Bring expertise in cybersecurity and ethical hacking to anticipate how adversarial examples could be used maliciously and to devise strategies to mitigate these risks.\\
+
+  \item \textbf{How will you know whether you have made progress? What will you measure?}\\
+  Progress in generating adversarial examples for computer vision systems can be effectively measured by tracking how frequently these examples mislead targeted models and assessing their ability to compromise multiple models across various architectures.
+
+  \item \textbf{What technical problems do you foresee or have?}\\
+  Creating adversarial examples that are effective not just on a specific model but across a wide range of models can be difficult. Achieving high transferability requires deep understanding of different model architectures and their vulnerabilities, which can be complex given the diversity of existing AI systems.
+
+  \item \textbf{Is there anything that we can do to help? E.G., resources, equipment.}\\
+  We may need to access the computing resources (GPU).
+\end{itemize}
+
+\end{document}
