@@ -1,4 +1,4 @@
-attack_method=fgsm
+attack_method=mifgsm
 model=resnet18
 input_dir=./data
 output_dir=./adv_data/$attack_method/$model
