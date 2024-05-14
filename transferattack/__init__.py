@@ -5,6 +5,7 @@ from .gradient.vnifgsm import VNIFGSM
 
 from .input_transformation.ssm import SSM
 from .advanced_objective.fia import FIA
+from .input_transformation.test import TEST
 
 attack_zoo = {
     'fgsm': FGSM,
@@ -13,6 +14,7 @@ attack_zoo = {
     'vnifgsm': VNIFGSM,
 
     'ssm': SSM,
+    'test': TEST,
 
     'fia': FIA,
 }
