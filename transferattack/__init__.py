@@ -17,6 +17,7 @@ attack_zoo = {
     'test': TEST,
 
     'fia': FIA,
+    'rpa': RPA
 }
 
 __version__ = '1.0.0'
