@@ -1,0 +1,324 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% CSCI 1430 Written Question Template
+%
+% This is a LaTeX document. LaTeX is a markup language for producing documents.
+% Your task is to answer the questions by filling out this document, then to
+% compile this into a PDF document.
+%
+% TO COMPILE:
+% > pdflatex thisfile.tex
+
+% If you do not have LaTeX, your options are:
+% - VSCode extension: https://marketplace.visualstudio.com/items?itemName=James-Yu.latex-workshop
+% - Online Tool: https://www.overleaf.com/ - most LaTeX packages are pre-installed here (e.g., \usepackage{}).
+% - Personal laptops (all common OS): http://www.latex-project.org/get/ 
+%
+% If you need help with LaTeX, please come to office hours.
+% Or, there is plenty of help online:
+% https://en.wikibooks.org/wiki/LaTeX
+%
+% Good luck!
+% The CSCI 1430 staff
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% How to include two graphics on the same line:
+% 
+% \includegraphics[width=0.49\linewidth]{yourgraphic1.png}
+% \includegraphics[width=0.49\linewidth]{yourgraphic2.png}
+%
+% How to include equations:
+%
+% \begin{equation}
+% y = mx+c
+% \end{equation}
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[10pt,twocolumn,letterpaper]{article}
+ 
+\usepackage{cvpr}
+\usepackage{times}
+\usepackage{epsfig}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{microtype}
+\usepackage{natbib}
+% From https://ctan.org/pkg/matlab-prettifier
+\usepackage[numbered,framed]{matlab-prettifier}
+
+\frenchspacing
+
+% Include other packages here, before hyperref.
+
+% If you comment hyperref and then uncomment it, you should delete
+% egpaper.aux before re-running latex.  (Or just hit 'q' on the first latex
+% run, let it finish, and you should be clear).
+\usepackage[pagebackref=true,breaklinks=true,letterpaper=true,colorlinks,bookmarks=false]{hyperref}
+
+\cvprfinalcopy
+\def\cvprPaperID{****}
+\def\httilde{\mbox{\tt\raisebox{-.5ex}{\symbol{126}}}}
+\ifcvprfinal\pagestyle{empty}\fi
+
+\begin{document}
+
+%%%%%%%%% TITLE
+\title{CSCI 1430 Final Project Report:\\Your project title}
+
+% Make this document not anonymous
+\author{
+    \emph{Pixel Pioneers}: Yuyang Luo, Zhihao Li, Jiachen Wang.\\
+    \emph{TA name:} Hannah.
+    Brown University\\
+}
+
+\maketitle
+%\thispagestyle{empty}
+
+%%%%%%%%% ABSTRACT
+\begin{abstract}
+Deep neural networks (DNNs) have achieved remarkable performance in various computer vision tasks, such as image classification, object detection, face recognition, and autonomous driving. However, recent studies have shown that DNNs are vulnerable to adversarial examples, which can cause misclassification through human-imperceptible perturbations. These adversarial examples exhibit a property called transferability, allowing attacks on one model to mislead other models, posing significant security risks. Although several attack methods have demonstrated impressive performance in white-box settings, their effectiveness diminishes in black-box scenarios, particularly against models with advanced defenses.
+
+To address the gap between white-box and transfer-based black-box attacks, we reproduced several representative methods, including VMI-FGSM, FIA, RPA, and SSA, within a unified framework to facilitate direct comparison under consistent experimental conditions. Motivated by SSA's approach of random scaling and noise addition in the frequency domain, we explored perturbing images' amplitude and phase components to enhance adversarial transferability. By transforming images to the frequency domain and adding Gaussian noise to both amplitude and phase to get more diverse inputs, our method generates more transferable adversarial examples. Experimental results show that our approach significantly outperforms baseline methods, demonstrating its superiority and effectiveness.
+
+% This document is a template for your final project reports, presented in a conference-paper style. It is sightly-more complicated LaTeX, but not much more complex than the earlier project reports. 
+% This document, along with your code, any supplemental material, and your 2-minute presentation, are qualitatively what determines your grade. 
+\end{abstract}
+
+
+% \section{Project Report Advice [Delete This Section]}
+
+% \begin{enumerate}
+%     \item Overriding principle: show us your effort.
+%     \item If you wish us to consider any aspect of your project, it should be presented here. \item Please include a problem statement, related work, your method, your results (figures! tables!), any comparison to existing techniques, and references. 
+%     \item If you made something work---great! If you didn't quite make it work---tell us about the problems, why you think it didn't work, and what you would do to fix it.
+%     \item Length: Approximately four pages for techical description. For social impact, no more than one page total.
+%     \item Please include an appendix to the report which details what each team member contributed to the project. One paragraph max each.
+%     \item Any other materials should go in an appendix.
+% \end{enumerate}
+
+
+%%%%%%%%% BODY TEXT
+\section{Introduction}
+Deep neural networks (DNNs) have achieved great performance in various computer vision tasks, such as image classification~\cite{simonyan2015very,he2016deep,szegedy2016rethinking}, objective detection~\cite{girshick2015fast, ren2015faster, he2017mask}, face recognition~\cite{taigman2014deepface, deng2019arcface, an2022pfc}, and autonomous driving~\cite{yu2022dual, wu2023transformation, wu2023policy}. However, recent works have shown that DNNs are vulnerable to adversarial examples~\cite{szegedy2014intriguing, goodfellow2015explaining}, in which applying human-imperceptible perturbations on clean input can result in misclassification. Furthermore, adversarial examples have an intriguing property of transferability~\cite{dong2018boosting, lin2020nesterov}, \ie, the adversarial example generated on the surrogate model can also mislead other victim models. The existence of transferability makes adversarial attacks practical to real-world applications because hackers do not need to know any information about the target model, which brings serious security threats to security-sensitive applications.
+
+Though several existing attack methods~\cite{kurakin2017adversarial,madry2018towards} have exhibited impressive attack performance in the white-box setting, their effectiveness notably diminishes in black-box scenarios, particularly against models equipped with advanced defenses~\cite{kurakin2017adversarialb, kurakin2018ensemble}. Recently, numerous methods have been proposed to improve adversarial transferability, such as introducing momentum in gradient iterations~\cite{dong2018boosting, lin2020nesterov, wang2021enhancing, wang2021boosting, ge2023boosting}, adopting various input transformations~\cite{xie2019improving, wang2021admix, yuan2022adaptive, wang2023structure, wang2023boosting}, and integrating multiple models for attacks~\cite{liu2017delving,chen2023rethinking}. However, there is still a distinct gap between the performance of white-box attacks and transfer-based black-box attacks.
+
+Numerous efforts have been made to bridge the gap between white-box attacks and transfer-based black-box attacks. However, the diversity in frameworks, datasets, and experimental settings has complicated the comparison of these methods. Motivated by this challenge, we reproduced several representative methods, including VNI-FGSM, FIA, RPA and SSA, within a unified framework. By testing these methods under consistent experimental conditions, we facilitated a clear and direct comparison of their effectiveness and performance.
+
+SSA randomly scales images and adds noise in the frequency domain, inspiring us to explore more processes in this domain. Given that images are composed of amplitude and phase components, we designed a method to perturb both components for data augmentation, thereby generating more transferable adversarial examples. Specifically, we transform images to the frequency domain and add Gaussian noise to both amplitude and phase, enhancing the perturbations. Experimental results demonstrate that our method significantly outperforms baseline methods, showing a clear margin of improvement and highlighting the superiority and effectiveness of our approach.
+
+% What's more, notice that SSA has good performance over the method we choose, we try to develop a new transformation method in frequency space. \textcolor{red}{We choose to...}
+
+
+
+% Introduce the problem that you are trying to solve. Why is it difficult? Briefly what approach will you take? What difference would it make if it were solved?
+
+
+\section{Related Work}
+
+In general, adversarial attacks can be divided into two categories, \ie, white-box attacks and black-box attacks. In the white-box setting, the attacker has all the information about the architecture and parameters of the target model~\cite{goodfellow2015explaining, kurakin2017adversarial}. By contrast, black-box attacks are more practical since they only access limited or no information about the target model. There are two types of black-box adversarial attacks~\cite{gao2021staircase,wang2022boosting,chen2020HopSkipJumpAttack}: query-based and transfer-based attacks. Query-based attacks~\cite{ilyas2018black,shi2019curls} often take hundreds or even thousands of queries to generate adversarial examples, making them inefficient. On the other hand, transfer-based attacks~\cite{dong2019evading, lin2020nesterov} generate adversaries on the surrogate model without accessing the target model, leading to superior practical applicability and attracting increasing attention.
+
+Though existing methods (\eg I-FGSM) have achieved great effectiveness in the white-box setting, they exhibit low transferability when attacking black-box models. To improve adversarial transferability, many works have been proposed from different perspectives. Gradient-based attacks use better optimization methods to make adversarial examples more transferable. For instance, MIM~\cite{dong2018boosting} integrates momentum into I-FGSM to stabilize the update direction and escape from poor local maxima at each iteration. VMI~\cite{wang2021enhancing} enhances the momentum by accumulating the gradient of several data points in the direction of the previous gradient for better transferability. Inspired by the data augmentation strategies~\cite{zhang2018mixup,verma2019manifold,yun2019cutmix}, various input transformation-based attacks have been proposed to effectively boost adversarial transferability. \cite{xie2019improving} adopt diverse input patterns by randomly resizing and padding to generate transferable adversarial examples. \cite{wang2021admix} mix up a set of images randomly sampled from other categories while maintaining the original label of the input to craft more transferable adversaries. \cite{long2022frequency} propose a novel spectrum simulation attack by transforming the input image in the frequency domain. Besides, architecture-related works try to modify the architecture of the source model to improve transferability. SGM~\cite{Wu2020Skip} adjusts the decay factor to increase gradient backpropagation from skip connections in ResNet. LinBP~\cite{guo2020backpropagating} alternates the gradient of ReLU to 1 and rescales the gradients in each block. BPA~\cite{wang2023rethinking} recovers the gradient truncated by non-linear layers using non-zero function.
+
+Several works have been proposed to enhance adversarial transferability by perturbing the intermediate features. TAP~\cite{zhou2018transferable} maximizes the distance among the intermediate features and smooths the adversarial perturbations with a regularizer. ILA~\cite{huang2019enhancing} fine-tunes an adversarial example crafted from another method (\eg, MIM) by increasing the feature difference similarity between the original/current adversarial example and the benign example at a specific layer. FIA~\cite{wang2021feature} disrupts object-aware features by minimizing a weighted feature spectrum in the intermediate layer. The weight is determined by computing the average gradient with respect to the feature across several randomly pixel-wise masked input images. RPA~\cite{zhang2022enhancing} computes the average gradient of randomly patch-wise masked images with different patch sizes, which serves as the weight in FIA to highlight important intrinsic object-related features effectively. NAA~\cite{zhang2022improving} uses neuron attribution for accurate neuron importance estimation, which develops an approximation scheme to reduce computation time and generates adversarial samples by minimizing a weighted combination of positive and negative neuron attribution values.
+
+\subsection{Adversarial Defenses}
+To mitigate the threat of adversarial examples, many methods have been proposed recently. A notable and efficacious defense mechanism is adversarial training~\cite{goodfellow2015explaining, madry2018towards}, which injects adversarial examples into training data to improve the network robustness. In particular, ensemble adversarial training~\cite{Tram2018ensemble} fortifies model robustness by training with adversarial examples derived from other pre-trained models, showing effectiveness against transfer-based attacks. Despite its efficacy, adversarial training is often hampered by significant computational demands and scalability issues, especially with expansive datasets and intricate neural networks. Additionally, several defense methods purify the adversarial examples before feeding into the model. For example, JPEG~\cite{karolina2016study} indicates that adversarial perturbations can be partly removed via JPEG compression. HGD~\cite{liao2018defense} trains a high-level representation guided denoiser to suppress the influence of adversarial perturbation. NIPS-r3 sends the transformed (\eg, rotation, sheer, shift) input images to an ensemble of adversarially trained models to get the final output.  R\&P~\cite{xie2018mitigating} utilizes random resizing and padding to mitigate adversarial effects.  Bit-Red~\cite{xu2018feature} reduces image color depth and employs smoothing to decrease pixel variations. FD~\cite{liu2019feature} introduces a JPEG-based defensive compression framework to rectify adversarial examples while preserving classification accuracy on benign data. NRP~\cite{naseer2020self} trains a Purifier Network in a self-supervised manner to purify the input. RS~\cite{cohen2019certified} utilizes randomized smoothing to train a certifiably $\ell_2$ robust classifier. 
+
+
+\section{Method}
+
+\subsection{VNI-FGSM}
+Traditional MI-FGSM (and NI-FGSM) techniques have sought to enhance attack robustness and transferability by stabilizing update directions, building upon the foundation of I-FGSM. However, these methods solely consider points along the optimization path throughout all iterations. VNI-FGSM represents a notable advancement over MI-FGSM (and NI-FGSM) by incorporating the neighbors of a point $x$ in perturbation calculation. It defines the variance at point $x$ as (Eq.~\ref{eq:variance}) 
+\begin{equation}
+    V(x) = \frac{1}{N} \sum_{i=1}^{N} \nabla_{x^i} J(x^i, y;\theta) - \nabla_{x} J(x, y;\theta),
+\label{eq:variance}
+\end{equation}
+where $N$ denotes the number of examples sampled within $x$'s neighborhood, and $x^i$ represents one such example sampled from a Uniform distribution controlled by hyperparameters $\beta$ and $\epsilon$.
+
+VNI-FGSM leverages the variance $v_t$ at iteration $t$ to adjust the gradient $x^{adv}$ at iteration $t+1$, introducing non-deterministic noise in each iteration. This strategic integration of variance facilitates superior robustness and transferability in adversarial attacks, paving the way for enhanced security in machine learning systems.
+
+\subsection{FIA}
+The Feature Importance-aware Attack (FIA) method innovates by leveraging model sensitivity to specific image regions. It focuses perturbations on important areas to maximize impact while preserving the image's overall naturalness. FIA uses aggregated gradients from transformed image versions to identify key features, employs random pixel dropout to maintain object integrity, and guides adversarial sample creation to disrupt critical features for enhanced transferability. The aggregated gradient can be represented as follows, with the probability of random pixel dropout denoted as \( p_d \).
+
+\begin{equation}
+\hat{x}_k = \frac{1}{C} \sum_{n=1}^{N} x^{\circ M^n_{p_d}}, \quad M_{p_d} \sim \text{Bernoulli}(1 - p_d),
+\end{equation}
+where the \(M_{p_d}\) is a binary matrix with the same size as \(x\), and \(\circ\) denotes the element-wise product. The normalizer \(C\) is obtained by \(\ell_2\)-norm on the corresponding summation term. The ensemble number \(N\) indicates the number of random masks applied to the input \(x\).
+
+\subsection{RPA}
+Random Patch Attack (RPA) effectively captures the intrinsic key features of objects through random patch transformations, significantly enhancing the transferability of adversarial examples. We introduced random patch transformations into benign images, where important object-related feature areas are highlighted by computing and aggregating the feature maps' gradients at intermediate layers. In contrast, model-specific features are suppressed. The aggregated gradients guide the adversarial perturbations, distorting important features and thus increasing the transferability of adversarial samples. The model attention areas on adversarial examples generated by FIA overlap with those on clean images, whereas RPA-produced adversarial examples significantly disperse the model's attention, causing the model to shift its focus from areas on clean images to completely different areas.
+
+
+\subsection{SSA}
+Traditional adversarial methods often struggle with a large transferability gap when the attack examples crafted using one model (substitute model) fail to deceive another model (victim model). To overcome this, SSA proposes enhancing the robustness and transferability of adversarial examples by manipulating them in the frequency domain rather than the traditional spatial domain. The focus on the frequency domain stems from the hypothesis that different models may focus on different frequency components of the input data, and by simulating this variability, the adversarial examples can be made more universally effective.
+
+To be specific, SSA proposes a random spectrum transformation $T(\cdot)$ which decomposes matrix multiplication into matrix addition and Hadamard product to get diverse spectrums. Specifically, in combination with the DCT/IDCT, the transformation can be expressed as:
+\begin{align}
+    \mathcal{T}(\bm{x}) &= \mathcal{D_I}((\mathcal{D}(\bm{x}) + \mathcal{D}(\bm{\xi})) \odot \bm{M}) \\
+                        &= \mathcal{D_I}(\mathcal{D}(\bm{x} + \bm{\xi}) \odot \bm{M})
+\end{align}
+where $\odot$ denotes Hadamard product, $\xi \sim \mathcal{N}(0, \sigma^2 I)$ and each element of $M \sim \mathcal{U}(1-\rho, 1+\rho)$ are random variants sampled from Gaussian distribution and Uniform distribution, respectively. 
+
+\subsection{Our Method}
+Inspired by the SSA perturbing frequency domain, we propose a method to perturb the amplitude and phase components of an image by transforming it into the frequency domain using the Discrete Cosine Transform (DCT). First, we apply DCT to convert the image from the spatial domain to the frequency domain. Next, we decompose the transformed image into its amplitude and phase components. We then add Gaussian noise to the amplitude component to create a perturbed amplitude. Finally, we recombine the perturbed amplitude with the original phase and apply the inverse DCT (IDCT) to transform the image back to the spatial domain. This process can be mathematically formulated as follows: transform the image using DCT, $( I_f = \text{DCT}(I) )$; extract amplitude and phase, $( A = |I_f| )$ and $( \Phi = \angle I_f )$; perturb the amplitude and the phase, $( A' = A + \mu * N(0, \sigma^2) )$ and $\Phi'=\Phi + N(0, \sigma^2)$; and recombine and apply IDCT, $( I_f' = A' \cdot e^{i\Phi'} )$ and $( I' = \text{IDCT}(I_f') )$. This technique allows for effective perturbation of the image in the frequency domain for various image processing and machine learning applications.
+
+\section{Results}
+
+\subsection{Evaluation}
+To further evaluate the transferability of the adversarial examples generated by each method, we conducted tests across a range of models. We assessed four conventionally trained CNNs, specifically ResNet-18, ResNet-101, ResNeXt-50, and DenseNet-101. Additionally, we tested the examples on four Vision Transformer (ViT) models: ViT, PiT, Visformer, and Swin. We also evaluated their effectiveness against four defensive methods, namely Adversarial Training (AT), High-gradient Denoising (HGD), Random Smoothing (RS), and Neural Representation Purifier (NRP).
+
+The outcomes for both CNNs and ViTs models are presented in Tab.~\ref{tab:attack_cnn} and Tab.~\ref{tab:attack_vit}. The findings indicate that under the white-box setting, all baseline methods achieve a 100\% success rate in attacks. However, in the context of black-box attacks, the FIA exhibits suboptimal performance. Among the baseline methods evaluated, SSA stands out, achieving the highest attack success rates on seven targeted models. Our proposed method delivers superior results on CNN-based target models and significantly outperforms SSA on ViT-based models, demonstrating a clear margin of superiority. These results underscore the effectiveness and enhanced performance of our proposed method.
+
+To further validate the effectiveness of our proposed methods, we evaluated the adversarial examples generated on ResNet-18 against four robust defense mechanisms. The results, presented in Tab.~\ref{tab:defense}, show a noticeable decline in attack performance, confirming the efficacy of these defense strategies. Among the baseline methods, SSA records the best performance against all four defenses. However, our method consistently surpasses SSA across all defenses, demonstrating superior versatility and effectiveness in counteracting a range of advanced and sophisticated defense mechanisms.
+
+\begin{table}[tb]
+    \centering
+    \begin{tabular}{cc*{3}{c}}
+        \toprule
+        Attack & Res-18 & Res-101 & ResNeXt & Dense-101 \\
+        \midrule
+        MIM &  100.0* & 42.5 & 46.5 & 75.1 \\
+        FIA &  99.2 & 30.1 & 35.8 & 65.8 \\
+        RPA &  100* & 65.3 & 69.1 & 92.3 \\
+        VNI-FGSM &  100.0* & 62.3 & 64.8 & 89.0 \\
+        SSA & 100.0* & 71.2 & 73.3 & 94.0 \\
+        Ours & 100.0* & 74.0 & 78.1 & 95.1 \\
+        \bottomrule
+    \end{tabular}
+    \caption{Attack success rates (\%) on four CNN models. The adversarial examples are crafted on Res-18. * indicates the white-box model.}
+    \label{tab:attack_cnn}
+\end{table}
+
+\begin{table}[tb]
+    \centering
+    \begin{tabular}{cc*{3}{c}}
+        \toprule
+        Attack & ViT & PiT & Visformer & Swin\\
+        \midrule
+        MIM & 17.2 & 23.8 & 33.2 & 40.3 \\
+        FIA & 10.7 & 16 & 23.7 & 35.4 \\
+        RPA & 24.3 & 33.6 & 50.9 & 54.6 \\
+        VNI-FGSM & 27.0 & 35.9 & 52.4 & 55.5 \\
+        SSA & 29.9 & 39.3 & 55.1 & 61.9 \\
+        Ours & 35.4 & 45.2 & 61.9 & 66.9\\
+        \bottomrule
+    \end{tabular}
+    \caption{Attack success rates (\%) on four advanced ViT models. The adversarial examples are crafted on Res-18.}
+    \label{tab:attack_vit}
+\end{table}
+
+\begin{table}[tb]
+    \centering
+    \begin{tabular}{cc*{3}{c}}
+        \toprule
+        Attack & AT & HGD & RS & NRP \\
+        \midrule
+        MIM &  33.1 & 32.0 & 22.4 & 26.5\\
+        FIA &  31.4 & 18.9 & 21.1 & 19.8\\
+        RPA & 35.8 & 56.3 & 26.7 & 39.1\\
+        VNI-FGSM & 34.6 & 50.2 & 25.0 & 38.2 \\
+        SSA & 37.2 & 62.1 & 29.2 & 50.9 \\
+        Ours & 39.2 & 64.1 & 29.4 & 53.9\\
+        \bottomrule
+    \end{tabular}
+    \caption{Attack success rates (\%) on four advanced defense methods. The adversarial examples are generated on the Res-18 model. The best results are in bold.}
+    \label{tab:defense}
+\end{table}
+
+%-------------------------------------------------------------------------
+\subsection{Technical Discussion}
+Given our goal to enhance the transferability of adversarial examples, it is crucial to evaluate the changes based on their effectiveness in fooling multiple models. This means assessing the success rate of the perturbed images not only on the model they were generated on but also across different architectures and datasets. By introducing variations in the amplitude and phase components in the frequency domain, we aim to create adversarial examples that are universally challenging for diverse models.
+
+Key considerations include maintaining a balance between the level of perturbation and the preservation of essential image features. While effective perturbations are necessary for improving transferability, it is also important to retain enough of the original image structure to ensure the examples remain realistic and semantically meaningful. This balance is critical for practical applications in adversarial training and robustness evaluation. In summary, the changes should focus on maximizing transferability while maintaining image quality.
+
+% What about your method raises interesting questions? Are there any trade-offs? What is the right way to think about the changes that you made?
+
+%------------------------------------------------------------------------
+% \section{Social Impact}
+\section{Conclusion}
+
+In conclusion, our project successfully addressed the challenge of comparing adversarial attack methods by standardizing the experimental framework and conditions. By reproducing and evaluating key techniques such as VMI-FGSM, FIA, RPA and SSA within a consistent setting, we provided a clearer understanding of their relative strengths and weaknesses. This approach not only enhances the reliability of comparative analyses in the field of adversarial machine learning but also sets a precedent for future research to follow a more standardized methodology for assessing and developing adversarial techniques. Our findings contribute significantly to the ongoing discourse on improving the robustness and efficacy of adversarial attack strategies.
+
+{\small
+\bibliographystyle{plain}
+\bibliography{ProjectFinal_ProjectReportTemplate}
+}
+
+
+\newpage
+\section*{Social Impact}
+In the world of computer vision, technology is advancing rapidly. We have already realized many useful functions such as autonomous driving and facial recognition. However, as technology progresses, potential threats and impacts in the security domain are also increasing, along with a variety of social ethical issues. For instance, in the realm of autonomous driving, if adversarial attack technology causes an accident, accountability is extremely difficult to establish because responsibility is still not clearly defined.
+
+The advancement of adversarial attack techniques, especially methods like VNI-FGSM, FIA, RPA, and SSA mentioned in our research, has enhanced the transferability of attacks, allowing attackers to launch attacks without precise knowledge of the target model. Traditional network security mechanisms are unable to cope with such adjustments. This enhancement of capabilities could lead to misuse of technology and endanger data security, particularly in areas of critical infrastructure and personal data protection.
+
+Moreover, such adversarial attacks can effectively deceive image recognition systems without significantly altering visual effects. To the human eye, they are indistinguishable from the original images, because the model often opts to modify the high-frequency components of the image during an adversarial attack. This makes it more covert and easier to execute undetected.
+
+In our research, we implemented and evaluated various types of Untargeted Attack methods, including Gradient-based, Input transformation-based, and Advanced objective. We assessed their effects in all aspects, especially in terms of enhancing transferability, and through experiments, we demonstrated the significant impact existing technologies can have on image classification tasks.
+
+Our research was conducted within a standard experimental framework, evaluating different attack methods to provide a standardized way of comparing different adversarial attack techniques. The models used for testing include CNN types, ViTs types, and defense models, comprehensively assessing the effects of adversarial samples and clearly demonstrating the strengths and weaknesses of different techniques. This framework serves as a valuable reference for researchers in this field.
+
+Additionally, we developed a new method, which uses the Discrete Cosine Transform (DCT) to convert images into the frequency domain to perturb their amplitude and phase components. This innovative approach has shown excellent attack success rates across various models. Inspired by the SSA algorithm, this method involves converting images to the frequency domain using DCT and perturbing their amplitude and phase components. We added Gaussian noise to the amplitude components and then recombined them. This technique allows us to effectively perturb images in the frequency domain, surpassing most replicated attack methods. This innovation expands the thinking on adversarial attacks, pointing the way for subsequent research and simultaneously promoting the study and upgrading of defense models.
+
+For society, our research serves as an important warning, reminding the community of the importance of developing new defense mechanisms, such as Adversarial Training and High-gradient Denoising. Only by thoroughly analyzing and testing adversarial attacks and defense strategies can the security of existing machine learning systems be enhanced. Understanding and improving these technologies can help design more robust AI systems to withstand real-world adversarial attacks.
+
+Future research should focus on improving the effectiveness and reliability of these defense technologies while exploring more methods that can effectively detect and neutralize adversarial attacks. Policymakers and regulatory bodies should also intervene, establishing appropriate regulations and standards to guide the healthy development of artificial intelligence technology and protect public interests.
+
+However, we must also acknowledge that our research results could potentially be misused for nefarious purposes, posing harm and risk to society. This is something we do not wish to see, and we need to establish a secure mechanism and encourage governments to enact more comprehensive laws quickly. We also hope that more information security professionals will see our research and develop their defense technologies based on our findings. We believe this will form a positive cycle.
+
+For the public, understanding these technologies is also a key factor in ensuring the healthy development of technology. Our research will make the public aware that attacks on original images are very covert and difficult to detect. This will make them more cautious and attentive to image attacks in the future. As researchers and technology developers, we hope that through these efforts, we can ensure the safety and harmony of society while safeguarding technological progress and innovation.
+
+In summary, our research has its own value and significance to society, and the positive effects it brings will far outweigh its negative impacts. We believe that more people will benefit from it.
+
+\newpage
+\section*{Appendix}
+
+\subsection*{Team contributions}
+
+Please describe in one paragraph per team member what each of you contributed to the project.
+\begin{description}
+\item[Person 1 (Jiachen Wang)] I have replicated two adversarial sample generation techniques under the category of Advanced Objectives, specifically the Feature Importance-aware Attack (FIA) and Random Patch Attack (RPA). I gathered data on their attack success rates against various models, including CNNs, ViTs, and defensive models. After a thorough investigation of their code, I found that both techniques inherit from MI-FGSM, which led me to conduct a performance comparison among these three attack methods. Additionally, the adversarial samples generated by these methods exhibit distinct visual effects and characteristics, which I have also observed and analyzed.
+\item[Person 2 (Zhihao Li)] I primarily focus on replicating the VMI-FGSM and VNI-FGSM attack methodologies, aiming at generating adversarial examples. These techniques involve manipulating input data to deceive machine learning models, resulting in erroneous predictions. As part of my exploration, I've delved into the intricacies of these methods, experimenting with replacing the conventional uniform distribution with a Gaussian distribution for sampling neighboring examples. Prior to initiating the hands-on implementation, I dedicated considerable time to conducting an extensive literature review. This comprehensive study encompassed previous research on gradient-based attack strategies, including renowned methods such as FGSM and I-FGSM. Through this thorough investigation, I cultivated a profound understanding of FGSM-based attack methodologies, laying a solid foundation for my subsequent research and experimentation.
+\item [Person 3 (Yuyang Luo)] In this course project, I meticulously selected a relevant topic and conducted thorough preliminary research to ground our study. I also successfully replicated and compared two prominent methods for generating adversarial samples—MIFGSM and SSA—highlighting their distinct mechanisms and efficiencies. Further, I attempted modifications to the SSA method to enhance its effectiveness, thereby contributing to the existing knowledge base. The culmination of the efforts is documented in a comprehensive project report that not only details our methodologies and findings but also reflects our analytical and practical engagements with the subject matter throughout the course.
+
+\end{description}
+
+\end{document}
+
+% Present the results of the changes. Include code snippets (just interesting things), figures (Figures \ref{fig:result1} and \ref{fig:result2}), and tables (Table \ref{tab:example}). Assess computational performance, accuracy performance, etc. Further, feel free to show screenshots, images; videos will have to be uploaded separately to Gradescope in a zip. Use whatever you need.
+
+
+%-------------------------------------------------------------------------
+\subsection{Technical Discussion}
+
+What about your method raises interesting questions? Are there any trade-offs? What is the right way to think about the changes that you made?
+
+%------------------------------------------------------------------------
+\section{Conclusion}
+In conclusion, our project successfully addressed the challenge of comparing adversarial attack methods by standardizing the experimental framework and conditions. By reproducing and evaluating key techniques such as VMI-FGSM, FIA, and SSA within a consistent setting, we provided a clearer understanding of their relative strengths and weaknesses. This approach not only enhances the reliability of comparative analyses in the field of adversarial machine learning but also sets a precedent for future research to follow a more standardized methodology for assessing and developing adversarial techniques. Our findings contribute significantly to the ongoing discourse on improving the robustness and efficacy of adversarial attack strategies.
+
+{\small
+\bibliographystyle{plain}
+\bibliography{ProjectFinal_ProjectReportTemplate}
+}
+
+\newpage
+\section*{Appendix}
+
+\subsection*{Team contributions}
+
+Please describe in one paragraph per team member what each of you contributed to the project.
+\begin{description}
+\item[Person 1 (Jiachen Wang)] 
+\item[Person 2 (Zhihao Li)] 
+\item [Person 3 (Yuyang Luo)] In this course project, I meticulously selected a relevant topic and conducted thorough preliminary research to ground our study. I also successfully replicated and compared two prominent methods for generating adversarial samples—MIFGSM and SSA—highlighting their distinct mechanisms and efficiencies. Further, I attempted modifications to the SSA method to enhance its effectiveness, thereby contributing to the existing knowledge base. I also write the corresponding part in the project report.
+
+\end{description}
+
+\end{document}
